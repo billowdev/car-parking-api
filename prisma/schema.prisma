@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+ url      = env("DATABASE_URL")
+}
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// enum ROLE_ENUM {
+//   admin
+//   user
+// }
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  username     String
+  password     String
+  email        String
+  phone_number String
+  role         String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  reserving Reserving[]
+
+  @@map(name: "users")
+}
+
+model ParkingArea {
+  id           Int         @id @default(autoincrement())
+  name         String
+  isReserved   Boolean
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+  reservations Reserving[]
+
+  @@map(name: "parking_areas")
+}
+
+model Reserving {
+  id            Int      @id @default(autoincrement())
+  plate_number  String
+  vehicle_brand String
+  price         Float
+  reserve_date  DateTime
+  user_id       Int
+  User          User     @relation(fields: [user_id], references: [id])
+
+  parking_area_id Int
+  ParkingArea     ParkingArea @relation(fields: [parking_area_id], references: [id])
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  @@map(name: "reservings")
+}
