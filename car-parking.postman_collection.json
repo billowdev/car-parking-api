@@ -1,0 +1,500 @@
+{
+	"info": {
+		"_postman_id": "fbf21bfc-f70f-4ba5-a936-99221c954115",
+		"name": "car-parking",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21020441"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "/login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"admin\",\r\n    \"password\":\"1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/users/login",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refresh_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwibmFtZSI6ImFkbWluIFNtaXRoIiwicm9sZSI6ImFkbWluIiwidG9rZW5fdHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MTMxNTk4MzEsImV4cCI6MTcxMzI0NjIzMX0.DxOzB8n_jkgUYsEgOXz3MOSM3nfDzEG5IrHivu8G5t0\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/users/refresh",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test3@gmail.com\",\r\n    \"username\": \"test register\",\r\n    \"name\": \"admin Smith\",\r\n    \"password\": \"1234\",\r\n    \"phone_number\": \"+0987654322\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/users/register",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"admin2\",\r\n    \"name\": \"admin Smith\",\r\n    \"password\":\"1234\",\r\n    \"email\": \"test2@gmail.com\",\r\n    \"phone_number\": \"+0987654322\",\r\n    \"role\": \"user\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/users",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"admin\",\r\n    \"name\": \"admin Smith 2\",\r\n    \"email\": \"admin@gmail.com\",\r\n    \"phone_number\": \"+0987654322\",\r\n    \"role\": \"admin\",\r\n    \"created_at\": \"2024-04-15T05:19:33.984Z\",\r\n    \"updated_at\": \"2024-04-15T05:19:33.984Z\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/users/3",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/users/4",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/users",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/users/6",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"users",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "parking-area",
+			"item": [
+				{
+					"name": "/parking-area",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"TEST\",\r\n    \"is_reserved\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/parking-area",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"parking-area"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/parking-area",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"A\",\r\n    \"is_reserved\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/parking-area/1",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"parking-area",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/parking-area",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/parking-area/7",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"parking-area",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/parking-area",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/parking-area",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"parking-area"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/parking-area/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/parking-area/7",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"parking-area",
+								"7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "reserving",
+			"item": [
+				{
+					"name": "/reservings",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"plate_number\": \"ABB201\",\r\n    \"vehicle_brand\": \"Honda\",\r\n    \"price\": 50,\r\n    \"parking_area_id\": 1,\r\n    \"start_time\": \"2024-04-15T10:37:39.243Z\",\r\n    \"end_time\": \"2024-04-15T11:37:39.243Z\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/reservings",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"reservings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservings",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"plate_number\": \"ABB202\",\r\n    \"vehicle_brand\": \"Honda\",\r\n    \"price\": 60,\r\n    \"parking_area_id\": 1,\r\n    \"start_time\": \"2024-04-15T10:37:39.243Z\",\r\n    \"end_time\": \"2024-04-15T11:37:39.243Z\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{ep}}/reservings/3",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"reservings",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservings",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/reservings/3",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"reservings",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/reservings",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"reservings"
+							],
+							"query": [
+								{
+									"key": "plate_number",
+									"value": "ABC123",
+									"disabled": true
+								},
+								{
+									"key": "vehicle_brand",
+									"value": "Toyota",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "reserved",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "page_size",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "user_username",
+									"value": "johndoe",
+									"disabled": true
+								},
+								{
+									"key": "start_time",
+									"value": "2024-04-15T08:37:39.243Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservings/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{ep}}/reservings/3",
+							"host": [
+								"{{ep}}"
+							],
+							"path": [
+								"reservings",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwibmFtZSI6ImFkbWluIFNtaXRoIiwicm9sZSI6ImFkbWluIiwidG9rZW5fdHlwZSI6ImFjY2VzcyIsImlhdCI6MTcxMzE1OTk4NCwiZXhwIjoxNzEzMjQ2Mzg0fQ.LOe3XpuF-B1UcAo88eBgbnU6ODL-UI917WNRJ4eFRTs",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "ep",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		}
+	]
+}

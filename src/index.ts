@@ -2,6 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import express, { Application } from "express";
 import bodyParser from "body-parser";
 import userRoutes from "./routes/user.route";
+import parkingAreaRoutes from "./routes/parking-area.route";
+import reservingRoutes from "./routes/reserving.route";
+
 import cors from "cors";
 import { IUser } from './interfaces/user.interface';
 
@@ -27,6 +30,8 @@ app.use(bodyParser.json());
 app.use(cors({ origin: "*" }));
 
 app.use(`/api/v1/users`, userRoutes);
+app.use(`/api/v1/parking-area`, parkingAreaRoutes);
+app.use(`/api/v1/reservings`, reservingRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
