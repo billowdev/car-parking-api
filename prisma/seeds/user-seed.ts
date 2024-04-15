@@ -1,7 +1,7 @@
 // user-seed.ts
 import { PrismaClient } from '@prisma/client';
-import { hashPassword } from "@/src/utils/password.util"
-import { ROLE_ENUM } from '@/src/utils/password.util';
+import { hashPassword } from "../../src/utils/password.util"
+import { ROLE_ENUM } from '../../src/configs/config';
 const prisma = new PrismaClient();
 
 async function seedUsers() {
