@@ -20,7 +20,25 @@ router.post(
   ReservingController.createReserving
 );
 
+router.put(
+  "/:id",
+  body("plate_number").notEmpty().isString().trim(),
+  body("price").notEmpty().isNumeric(),
+  body("parking_area_id").notEmpty().isInt(),
+  body("start_time").notEmpty().isString().trim().isISO8601(),
+  body("end_time").notEmpty().isString().trim().isISO8601(),
+  authMiddleware,
+  ReservingController.updateReserving
+);
+router.get("/:id", authMiddleware, ReservingController.getReservingById);
+
+
 router.get("", authMiddleware, ReservingController.getAllReserving);
 
+router.delete(
+  "/:id",
+  authMiddleware,
+  ReservingController.deleteReserving
+);
 
 export default router;

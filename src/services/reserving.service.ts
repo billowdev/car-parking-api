@@ -54,11 +54,29 @@ const ReservingService = {
       }
     }
 
-    const { plate_number, vehicle_brand, price, start_time, end_time } =
-      payload;
+    const {
+      plate_number,
+      vehicle_brand,
+      price,
+      start_time,
+      end_time,
+      user_id,
+      parking_area_id,
+    } = payload;
 
     // Validate payload data
-    if (!plate_number || !vehicle_brand || !price || !start_time || !end_time) {
+    if (
+      !plate_number ||
+      !vehicle_brand ||
+      !price ||
+      !start_time ||
+      !end_time ||
+      !parking_area_id ||
+      !user_id
+    ) {
+      console.log("-------user_id")
+      console.log(user_id)
+      console.log("-------user_id")
       throw new Error("Invalid payload data");
     }
 
@@ -78,13 +96,10 @@ const ReservingService = {
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
       status: "reserved", // Using uppercase for consistency
-      user: {
-        connect: { id: payload.user_id },
-      },
-      parking_area: {
-        connect: { id: payload.parking_area_id },
-      },
+      user_id: payload.user_id,
+      parking_area_id: payload.parking_area_id,
     };
+
     return prisma.reserving.create({
       select: {
         id: true,
@@ -244,6 +259,120 @@ const ReservingService = {
       rows: result,
     };
     return paginationResponse;
+  },
+
+  async getReservingById(id: number) {
+    return prisma.reserving.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        plate_number: true,
+        vehicle_brand: true,
+        price: true,
+        status: true,
+        start_time: true,
+        end_time: true,
+        parking_area_id: true,
+        user_id: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            phone_number: true,
+            role: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+        parking_area: {
+          select: {
+            id: true,
+            name: true,
+            is_reserved: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+        created_at: true,
+        updated_at: true,
+      },
+    });
+  },
+
+  async updateReserving(id: number, payload: IReserving) {
+    const oldReservation = await prisma.reserving.findFirst({
+      where: {
+        id, // Replace with the actual ID of the reservation being updated
+      },
+    });
+
+    if (!oldReservation) {
+      throw new Error("Reservation not found");
+    }
+
+    const newParkingAreaId = payload.parking_area_id;
+
+    if (oldReservation.parking_area_id !== newParkingAreaId) {
+      const checkAlreadyReserved = await prisma.reserving.findFirst({
+        where: {
+          parking_area_id: newParkingAreaId,
+          status: "reserved",
+          end_time: { lt: new Date().toISOString() },
+        },
+      });
+
+      if (checkAlreadyReserved) {
+        throw new Error("The new parking area is already reserved.");
+      }
+    }
+
+    // Update the parking area
+    return prisma.reserving.update({
+      where: { id },
+      select: {
+        id: true,
+        plate_number: true,
+        vehicle_brand: true,
+        price: true,
+        status: true,
+        start_time: true,
+        end_time: true,
+        parking_area_id: true,
+        user_id: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            phone_number: true,
+            role: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+        parking_area: {
+          select: {
+            id: true,
+            name: true,
+            is_reserved: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+        created_at: true,
+        updated_at: true,
+      },
+      data: payload,
+    });
+  },
+
+  async deleteReserving(id: number) {
+    return prisma.reserving.delete({
+      where: { id },
+    });
   },
 };
 

@@ -3,8 +3,8 @@ import { newResponse, parseStringQuery } from "../utils/common.util";
 import {
   IReservingFilter,
   IDateFilterOptions,
-  ErrorResponse,
-  ErrorArray,
+  IErrorResponse,
+  IErrorArray,
   IPaginationOptions,
 } from "./../interfaces";
 import ReservingService from "./../services/reserving.service";
@@ -19,12 +19,29 @@ export const ReservingController = {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ErrorResponse<ErrorArray> = {
+        const response: IErrorResponse<IErrorArray> = {
           errors: errors.array(),
         };
         return newResponse(res, 400, "FAILED", response);
       }
       const body = req.body;
+      const user = req.user;
+      if (!user || !user.id) {
+        return newResponse<IErrorResponse<string>>(res, 400, "FAILED", {
+          errors: "Unauthorized",
+        });
+      }
+
+      const userID = user.id
+
+      if (isNaN(userID)) {
+        return newResponse<IErrorResponse<string>>(res, 400, "FAILED", {
+          errors: "Unauthorized",
+        });
+      } else {
+        body.user_id = userID;
+      }
+
       const resp = await ReservingService.createReserving(body);
       return newResponse<typeof resp>(res, 200, "SUCCESS", resp);
     } catch (error) {
@@ -48,7 +65,7 @@ export const ReservingController = {
         end_time: parseStringQuery(req.query.end_time),
         user_id: parseStringQuery(req.query.user_id),
         parking_area_id: parseStringQuery(req.query.parking_area_id),
-        
+
         user_name: parseStringQuery(req.query.user_name),
         user_email: parseStringQuery(req.query.user_email),
         user_username: parseStringQuery(req.query.user_username),
@@ -77,6 +94,68 @@ export const ReservingController = {
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
+    }
+  },
+
+  async getReservingById(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const resp = await ReservingService.getReservingById(parseInt(id));
+      if (!resp) {
+        return newResponse<{ error: string }>(res, 404, "FAILED", {
+          error: "reserving not found",
+        });
+      }
+      return newResponse<typeof resp>(res, 200, "SUCCESS", resp);
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---ReservingController->getReservingById---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
+    }
+  },
+  async updateReserving(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: IErrorResponse<IErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
+      const body = req.body;
+      const information = await ReservingService.updateReserving(
+        parseInt(id),
+        body
+      );
+      return newResponse<typeof information>(res, 200, "SUCCESS", information);
+    } catch (error) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---ReservingController->updateReserving---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
+    }
+  },
+  async deleteReserving(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      await ReservingService.deleteReserving(parseInt(id));
+      return newResponse<null>(res, 200, "SUCCESS", null);
+    } catch (error: unknown) {
+      //   const errMsg = (error as Error)?.message ?? "";
+      const errMsg = (error as Error)?.message ?? "";
+      console.log("---ReservingController->deleteReserving---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(
+        res,
+        400,
+        "FAILED",
+        "Something went wrong while delete reserving"
+      );
     }
   },
 };

@@ -3,8 +3,8 @@ import { newResponse, parseStringQuery } from "../utils/common.util";
 import {
   IParkingAreaFilter,
   IDateFilterOptions,
-  ErrorResponse,
-  ErrorArray,
+  IErrorResponse,
+  IErrorArray,
   IPaginationOptions,
 } from "./../interfaces";
 import os from "os";
@@ -18,7 +18,7 @@ export const ParkingAreaController = {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ErrorResponse<ErrorArray> = {
+        const response: IErrorResponse<IErrorArray> = {
           errors: errors.array(),
         };
         return newResponse(res, 400, "FAILED", response);
@@ -92,7 +92,7 @@ export const ParkingAreaController = {
       const { id } = req.params;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ErrorResponse<ErrorArray> = {
+        const response: IErrorResponse<IErrorArray> = {
           errors: errors.array(),
         };
         return newResponse(res, 400, "FAILED", response);
