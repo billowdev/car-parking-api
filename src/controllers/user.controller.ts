@@ -9,12 +9,16 @@ import {
   IUserFilter,
   IPaginationOptions,
   IGetAllUserOptions,
+  ErrorResponse,
+  ErrorArray,
 } from "../interfaces";
 
 import os from "os";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
 import UserService from "./../services/user.service";
 import { JWT_SECRET_KEY } from "./../configs/config";
+import { validationResult } from "express-validator";
+import { ITokenResponse } from "./../utils/jwt.util";
 
 const hostname = os.hostname();
 
@@ -23,29 +27,23 @@ export const UserController = {
     const refreshToken = req.body.refresh_token;
 
     try {
-      // Verify the refresh token
       const verify = verifyToken(refreshToken);
       const decoded = decodeToken(refreshToken);
-
-      // Assuming you extract the necessary user information from the refresh token
       const sub = decoded.sub ?? "";
       const user = await UserService.getUserById(parseInt(sub)); // Fetch user from database based on userId
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      // Generate new tokens for the user
       const { access_token, refresh_token: newRefreshToken } = generateTokens({
         sub: sub,
         role: user.role,
         name: user.name,
       });
-
-      // Send the new access token and refresh token back to the client
-      return res
-        .status(200)
-        .json({ access_token, refresh_token: newRefreshToken });
+      return newResponse<ITokenResponse>(res, 200, "SUCCESS", {
+        access_token,
+        refresh_token: newRefreshToken,
+      });
     } catch (error) {
       console.error("Error refreshing token:", error);
       return res.status(401).json({ message: "Invalid refresh token" });
@@ -53,24 +51,66 @@ export const UserController = {
   },
   async login(req: Request, res: Response) {
     try {
+      const username = req.body.username.toLowerCase();
       const credentials = {
-        username: req.body.username,
+        username: username,
         password: req.body.password,
       };
       const token = await UserService.login(credentials);
       return newResponse<any>(res, 200, "SUCCESS", token);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->login---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
+  async register(req: Request, res: Response) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ErrorResponse<ErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
 
+      const body = req.body;
+      if (body.email) {
+        body.email = body.email.toLowerCase();
+      }
+      if (body.username) {
+        body.username = body.username.toLowerCase();
+      }
+      body.role = "user";
+      const newUser = await UserService.createUser(body);
+      return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController->register---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
+    }
+  },
   async createUser(req: Request, res: Response) {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ErrorResponse<ErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
+
       const body = req.body;
+      if (body.email) {
+        body.email = body.email.toLowerCase();
+      }
+      if (body.username) {
+        body.username = body.username.toLowerCase();
+      }
       const newUser = await UserService.createUser(body);
       if (body.role && !["admin", "user"].includes(body.role)) {
         throw new Error("Invalid role. Role must be 'admin' or 'user'.");
@@ -78,7 +118,7 @@ export const UserController = {
       return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->createUser---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
@@ -88,9 +128,13 @@ export const UserController = {
   async getAllUsers(req: Request, res: Response) {
     try {
       const host = req.protocol + "://" + req.get("host") + req.originalUrl;
+      const email = parseStringQuery(req.query.email)?.toLowerCase() ?? "";
+      const username =
+        parseStringQuery(req.query.username)?.toLowerCase() ?? "";
+
       const filters: IUserFilter | IDateFilterOptions = {
-        email: parseStringQuery(req.query.email),
-        username: parseStringQuery(req.query.username),
+        email: email,
+        username: username,
         phone_number: parseStringQuery(req.query.phone_number),
         id: parseStringQuery(req.query.id),
         name: parseStringQuery(req.query.name),
@@ -122,7 +166,7 @@ export const UserController = {
       return newResponse<typeof users>(res, 200, "SUCCESS", users);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->getAllUsers---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
@@ -134,32 +178,49 @@ export const UserController = {
       const { id } = req.params;
       const user = await UserService.getUserById(parseInt(id));
       if (!user) {
-        return newResponse<{error: string}>(res, 404, "FAILED", { error: "User not found" });
+        return newResponse<{ error: string }>(res, 404, "FAILED", {
+          error: "User not found",
+        });
       }
       return newResponse<typeof user>(res, 200, "SUCCESS", user);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
-      console.log(error);
+      console.log("---UserController->getUserById---");
+      console.log("error", error);
+      console.log("errMsg", errMsg);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
   async updateUser(req: Request, res: Response) {
-    const { id } = req.params;
     try {
-      const data = req.body;
-      const existing = await UserService.getUserById(parseInt(id)); 
-      const updatedUser = await UserService.updateUser(parseInt(id), data);
-      if (data.role && !["admin", "user"].includes(data.role)) {
+      const { id } = req.params;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ErrorResponse<ErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
+      const body = req.body;
+      if (body.email) {
+        body.email = body.email.toLowerCase();
+      }
+      if (body.username) {
+        body.username = body.username.toLowerCase();
+      }
+      const existing = await UserService.getUserById(parseInt(id));
+      const updatedUser = await UserService.updateUser(parseInt(id), body);
+      if (body.role && !["admin", "user"].includes(body.role)) {
         throw new Error("Invalid role. Role must be 'admin' or 'user'.");
       }
       return newResponse<typeof updatedUser>(res, 200, "SUCCESS", updatedUser);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
       console.log("---UserController---");
-      console.log(error);
+      console.log("error", error);
+      console.log("errMsg", errMsg);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
     }
@@ -172,10 +233,16 @@ export const UserController = {
       return newResponse<null>(res, 200, "SUCCESS", null);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
-      console.log(error);
+      console.log("---UserController->deleteUser---");
+      console.log("error", error);
+      console.log("errMsg", errMsg);
       console.log("-----");
-      return newResponse<string>(res, 400, "FAILED", errMsg);
+      return newResponse<string>(
+        res,
+        400,
+        "FAILED",
+        "Something went wrong while delete user"
+      );
     }
   },
 };

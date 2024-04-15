@@ -1,4 +1,12 @@
 import { IUserFilter } from "./user.interface";
+
+export interface ErrorResponse<T> {
+  errors: T;
+}
+
+// Assuming `errors.array()` returns an array of error objects
+export type ErrorArray = ReturnType<typeof validationResult>['array'];
+
 export interface IAPIResponse<T> {
   code: string;
   message: string;

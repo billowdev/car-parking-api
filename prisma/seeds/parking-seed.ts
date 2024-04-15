@@ -29,32 +29,32 @@ async function seedData() {
       {
         id: 1,
         name: "A",
-        isReserved: false,
+        is_reserved: false,
       },
       {
         id: 2,
         name: "B",
-        isReserved: true,
+        is_reserved: true,
       },
       {
         id: 3,
         name: "C",
-        isReserved: false,
+        is_reserved: false,
       },
       {
         id: 4,
         name: "D",
-        isReserved: false,
+        is_reserved: false,
       },
       {
         id: 5,
         name: "E",
-        isReserved: false,
+        is_reserved: false,
       },
       {
         id: 6,
         name: "F",
-        isReserved: false,
+        is_reserved: false,
       },
     ];
     await prisma.parkingArea.createMany({
