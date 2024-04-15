@@ -6,22 +6,31 @@ const prisma = new PrismaClient();
 async function seedData() {
   try {
     // Seed data for Reserving
+    const startTime = new Date();
+
+    // Calculate the end time by adding 1 hour to the start time
+    const endTime = new Date(startTime.getTime() + 1 * 60 * 60 * 1000);
+
     const reservingData = [
       {
         plate_number: "ABC123",
         vehicle_brand: "Toyota",
         price: 50.0,
-        reserve_date: new Date(),
+        start_time: startTime,
+        end_time: endTime,
         user_id: 1,
         parking_area_id: 1,
+        status: "reserved",
       },
       {
         plate_number: "DEF456",
         vehicle_brand: "Honda",
         price: 50.0,
-        reserve_date: new Date(),
+        start_time: startTime,
+        end_time: endTime,
         user_id: 2,
         parking_area_id: 2,
+        status: "reserved",
       },
     ];
 
@@ -65,7 +74,6 @@ async function seedData() {
     await prisma.reserving.createMany({
       data: reservingData,
     });
-
 
     console.log(
       "Seed data for Reserving and ParkingArea inserted successfully"

@@ -63,9 +63,51 @@ export async function applyFilters<T>(
     }
   }
 }
+
+// export const applyDateFilters = async (
+//   where: any,
+//   dateFilters: IDateFilterOptions
+// ): Promise<void> => {
+//   const { range_filter_field, start, end, ...otherFilters } = dateFilters;
+
+//   if (range_filter_field && (start || end)) {
+//     where[range_filter_field] = {};
+//     if (start) {
+//       where[range_filter_field].gte = parseDateString(start ?? '');
+//     }
+//     if (end) {
+//       where[range_filter_field].lte = parseDateString(end ?? '');
+//     }
+//   } else {
+//     for (const key of Object.keys(otherFilters)) {
+//       if (key === 'created_after' || key === 'updated_after' || key === 'created_before' || key === 'updated_before') {
+//         const filterValue = parseDateString(dateFilters[key as keyof IDateFilterOptions] ?? '');
+//         if (filterValue) {
+//           if (!where.AND) {
+//             where.AND = [];
+//           }
+//           const field = key === 'created_after' || key === 'updated_after' ? key.replace('_after', '_at') : key.replace('_before', '_at');
+//           const operator = key.includes('after') ? 'gte' : 'lte';
+//           const condition: any = {};
+//           condition[field] = { [operator]: filterValue };
+//           where.AND.push(condition);
+//         }
+//       } else {
+//         const filterValue = parseDateString(dateFilters[key as keyof IDateFilterOptions] ?? '');
+//         if (filterValue) {
+//           if (!where.AND) {
+//             where.AND = [];
+//           }
+//           where.AND.push({ [key]: filterValue });
+//         }
+//       }
+//     }
+//   }
+// };
+
 export const applyDateFilters = async (
   where: any,
-  dateFilters: IDateFilterOptions
+  dateFilters: IDateFilterOptions & Record<string, any>
 ): Promise<void> => {
   const { range_filter_field, start, end, ...otherFilters } = dateFilters;
 
@@ -80,7 +122,7 @@ export const applyDateFilters = async (
   } else {
     for (const key of Object.keys(otherFilters)) {
       if (key === 'created_after' || key === 'updated_after' || key === 'created_before' || key === 'updated_before') {
-        const filterValue = parseDateString(dateFilters[key as keyof IDateFilterOptions] ?? '');
+        const filterValue = parseDateString(dateFilters[key] ?? '');
         if (filterValue) {
           if (!where.AND) {
             where.AND = [];
@@ -92,7 +134,7 @@ export const applyDateFilters = async (
           where.AND.push(condition);
         }
       } else {
-        const filterValue = parseDateString(dateFilters[key as keyof IDateFilterOptions] ?? '');
+        const filterValue = parseDateString(dateFilters[key] ?? '');
         if (filterValue) {
           if (!where.AND) {
             where.AND = [];
@@ -103,7 +145,6 @@ export const applyDateFilters = async (
     }
   }
 };
-
 
 function parseDateString(dateString: string): Date | string {
   try {
