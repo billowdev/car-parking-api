@@ -31,7 +31,7 @@ app.use(cors({ origin: "*" }));
 
 app.use(`/api/v1/users`, userRoutes);
 app.use(`/api/v1/parking-area`, parkingAreaRoutes);
-app.use(`/api/v1/reserving`, reservingRoutes);
+app.use(`/api/v1/reservings`, reservingRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

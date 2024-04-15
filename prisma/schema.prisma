@@ -57,7 +57,7 @@ model Reserving {
   price         Float
   start_time    DateTime @map("start_time")
   end_time      DateTime @map("end_time")
-  // reserve_date  DateTime
+  status        String
   user_id       Int
   user          User     @relation(fields: [user_id], references: [id])
 

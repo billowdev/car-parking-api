@@ -9,8 +9,8 @@ import {
   IUserFilter,
   IPaginationOptions,
   IGetAllUserOptions,
-  ErrorResponse,
-  ErrorArray,
+  IErrorResponse,
+  IErrorArray,
 } from "../interfaces";
 
 import os from "os";
@@ -70,7 +70,7 @@ export const UserController = {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ErrorResponse<ErrorArray> = {
+        const response: IErrorResponse<IErrorArray> = {
           errors: errors.array(),
         };
         return newResponse(res, 400, "FAILED", response);
@@ -98,7 +98,7 @@ export const UserController = {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ErrorResponse<ErrorArray> = {
+        const response: IErrorResponse<IErrorArray> = {
           errors: errors.array(),
         };
         return newResponse(res, 400, "FAILED", response);
@@ -198,7 +198,7 @@ export const UserController = {
       const { id } = req.params;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const response: ErrorResponse<ErrorArray> = {
+        const response: IErrorResponse<IErrorArray> = {
           errors: errors.array(),
         };
         return newResponse(res, 400, "FAILED", response);

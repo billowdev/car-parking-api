@@ -88,7 +88,7 @@ const ParkingAreaService = {
       take: page_size,
     });
 
-    const total_count = await prisma.user.count({ where });
+    const total_count = await prisma.parkingArea.count({ where });
     const total_pages = Math.ceil(total_count / page_size);
 
     const paginationResponse: IPaginationResponse<IParkingAreaResponse[]> = {
