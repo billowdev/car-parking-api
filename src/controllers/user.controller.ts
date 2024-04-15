@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { newResponse, parseStringQuery } from "../utils/common.util";
 import { generateTokens, decodeToken, verifyToken } from "../utils/jwt.util";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 import {
   IAPIResponse,
@@ -14,7 +14,7 @@ import {
 import os from "os";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
 import UserService from "./../services/user.service";
-import { JWT_SECRET_KEY } from './../configs/config';
+import { JWT_SECRET_KEY } from "./../configs/config";
 
 const hostname = os.hostname();
 
@@ -24,11 +24,11 @@ export const UserController = {
 
     try {
       // Verify the refresh token
-      const verify = verifyToken(refreshToken)
+      const verify = verifyToken(refreshToken);
       const decoded = decodeToken(refreshToken);
 
       // Assuming you extract the necessary user information from the refresh token
-      const sub = decoded.sub ?? ""
+      const sub = decoded.sub ?? "";
       const user = await UserService.getUserById(parseInt(sub)); // Fetch user from database based on userId
 
       if (!user) {
@@ -70,8 +70,12 @@ export const UserController = {
 
   async createUser(req: Request, res: Response) {
     try {
-      const newUser = await UserService.createUser(req.body);
-      res.json(newUser);
+      const body = req.body;
+      const newUser = await UserService.createUser(body);
+      if (body.role && !["admin", "user"].includes(body.role)) {
+        throw new Error("Invalid role. Role must be 'admin' or 'user'.");
+      }
+      return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
       console.log("---UserController---");
@@ -126,13 +130,13 @@ export const UserController = {
   },
 
   async getUserById(req: Request, res: Response) {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
       const user = await UserService.getUserById(parseInt(id));
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return newResponse<{error: string}>(res, 404, "FAILED", { error: "User not found" });
       }
-      res.json(user);
+      return newResponse<typeof user>(res, 200, "SUCCESS", user);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
       console.log("---UserController---");
@@ -145,8 +149,13 @@ export const UserController = {
   async updateUser(req: Request, res: Response) {
     const { id } = req.params;
     try {
-      const updatedUser = await UserService.updateUser(parseInt(id), req.body);
-      res.json(updatedUser);
+      const data = req.body;
+      const existing = await UserService.getUserById(parseInt(id)); 
+      const updatedUser = await UserService.updateUser(parseInt(id), data);
+      if (data.role && !["admin", "user"].includes(data.role)) {
+        throw new Error("Invalid role. Role must be 'admin' or 'user'.");
+      }
+      return newResponse<typeof updatedUser>(res, 200, "SUCCESS", updatedUser);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
       console.log("---UserController---");
@@ -160,7 +169,7 @@ export const UserController = {
     const { id } = req.params;
     try {
       await UserService.deleteUser(parseInt(id));
-      res.json({ message: "User deleted successfully" });
+      return newResponse<null>(res, 200, "SUCCESS", null);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
       console.log("---UserController---");

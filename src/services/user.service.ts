@@ -12,7 +12,11 @@ import {
 import { generatePaginationLinks } from "./../utils/pagination.util";
 import { applyFilters, applyDateFilters } from "./../utils/pagination.util";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
-import { generateToken, generateTokens, ITokenResponse } from "./../utils/jwt.util";
+import {
+  generateToken,
+  generateTokens,
+  ITokenResponse,
+} from "./../utils/jwt.util";
 import { ITokenClaims } from "./../utils/jwt.util";
 import { relativeTimeRounding } from "./../../node_modules/moment/moment.d";
 
@@ -23,7 +27,7 @@ const UserService = {
     const username = c.username;
     const user = await prisma.user.findFirst({
       where: { username },
-    })
+    });
 
     const hashedPassword = user?.password ?? "";
     const validatePassword = await verifyPassword(hashedPassword, c.password);
@@ -36,21 +40,59 @@ const UserService = {
         name: name,
         role: role,
       };
-      const token: ITokenResponse = generateTokens(userClaims)
+      const token: ITokenResponse = generateTokens(userClaims);
       // const token = generateToken(userClaims);
-      return token
+      return token;
     } else {
       throw new Error("Error verifying password");
     }
   },
 
   async createUser(userData: IUser) {
-    const pwd = userData?.password as string
-    const hasing: string = await hashPassword(pwd);
+    // Check for duplicate email
+    const existingEmail = await prisma.user.findFirst({
+      where: { email: userData.email },
+    });
+
+    if (existingEmail) {
+      throw new Error("Email is already in use.");
+    }
+
+    // Check for duplicate username
+    const username = userData.username ?? "";
+    if (username == "") {
+      throw new Error("username is empty.");
+    }
+    const existingUsername = await prisma.user.findFirst({
+      where: { username: username },
+    });
+
+    if (existingUsername) {
+      throw new Error("Username is already in use.");
+    }
+
+    // Hash the password
+    const pwd = userData.password ?? "";
+    if (pwd == "") {
+      throw new Error("Password is empty.");
+    }
+    const hashedPassword = await hashPassword(pwd);
+
+    // Create the user
     return prisma.user.create({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        phone_number: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
       data: {
         ...userData,
-        password: hasing,
+        password: hashedPassword,
       },
     });
   },
@@ -133,7 +175,48 @@ const UserService = {
   },
 
   async updateUser(id: number, userData: any) {
+    if (userData.password) {
+      userData.password = await hashPassword(userData.password);
+    }
+    const email = userData.email;
+    if (email) {
+      const existingEmail = await prisma.user.findFirst({
+        where: {
+          email: userData.email,
+          NOT: {
+            id: id,
+          },
+        },
+      });
+
+      if (existingEmail) {
+        throw new Error("Email is already in use.");
+      }
+    }
+
+    const username = userData.username ?? "";
+    if (username) {
+      const existingUsername = await prisma.user.findFirst({
+        where: {
+          username,
+          NOT: {
+            id: id,
+          },
+        },
+      });
+    }
+
     return prisma.user.update({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        phone_number: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
       where: { id },
       data: userData,
     });
