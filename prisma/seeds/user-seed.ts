@@ -27,13 +27,30 @@ async function seedUsers() {
         phone_number: '+0987654321',
         role: ROLE_ENUM.ADMIN,
       },
+      {
+        id: 3,
+        name: 'admin Smith',
+        username: 'admin',
+        password: hashing,
+        email: 'admin@gmail.com',
+        phone_number: '+0987654322',
+        role: ROLE_ENUM.ADMIN,
+      },
     ];
 
     // Insert seed data into the database
     for (const user of users) {
-      await prisma.user.create({
-        data: user,
-      });
+      for (const user of users) {
+        try {
+          await prisma.user.create({
+            data: user,
+          });
+        } catch (error) {
+          // Handle the error gracefully, or simply ignore it if you don't need to take any action
+          console.error("Error creating user:", error);
+        }
+      }
+      
     }
 
     console.log('Seed data for users inserted successfully');

@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { newResponse, parseStringQuery } from "../utils/common.util";
+import { generateTokens, decodeToken, verifyToken } from "../utils/jwt.util";
+import jwt from 'jsonwebtoken';
+
 import {
   IAPIResponse,
   IUser,
@@ -10,17 +13,51 @@ import {
 
 import os from "os";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
-import UserService from './../services/user.service';
+import UserService from "./../services/user.service";
+import { JWT_SECRET_KEY } from './../configs/config';
+
 const hostname = os.hostname();
 
 export const UserController = {
+  async refresh(req: Request, res: Response) {
+    const refreshToken = req.body.refresh_token;
+
+    try {
+      // Verify the refresh token
+      const verify = verifyToken(refreshToken)
+      const decoded = decodeToken(refreshToken);
+
+      // Assuming you extract the necessary user information from the refresh token
+      const sub = decoded.sub ?? ""
+      const user = await UserService.getUserById(parseInt(sub)); // Fetch user from database based on userId
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate new tokens for the user
+      const { access_token, refresh_token: newRefreshToken } = generateTokens({
+        sub: sub,
+        role: user.role,
+        name: user.name,
+      });
+
+      // Send the new access token and refresh token back to the client
+      return res
+        .status(200)
+        .json({ access_token, refresh_token: newRefreshToken });
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+  },
   async login(req: Request, res: Response) {
     try {
       const credentials = {
         username: req.body.username,
         password: req.body.password,
-      }
-      const token = await UserService.login(credentials)
+      };
+      const token = await UserService.login(credentials);
       return newResponse<any>(res, 200, "SUCCESS", token);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
@@ -66,7 +103,7 @@ export const UserController = {
         start: parseStringQuery(req.query.start),
         end: parseStringQuery(req.query.end),
       };
- 
+
       const page = parseInt((req.query.page as string) ?? "1");
 
       const page_size = parseInt((req.query.page_size as string) ?? "10");

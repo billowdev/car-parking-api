@@ -12,7 +12,7 @@ import {
 import { generatePaginationLinks } from "./../utils/pagination.util";
 import { applyFilters, applyDateFilters } from "./../utils/pagination.util";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
-import { generateToken } from "./../utils/jwt.util";
+import { generateToken, generateTokens, ITokenResponse } from "./../utils/jwt.util";
 import { ITokenClaims } from "./../utils/jwt.util";
 import { relativeTimeRounding } from "./../../node_modules/moment/moment.d";
 
@@ -36,16 +36,17 @@ const UserService = {
         name: name,
         role: role,
       };
-
-      const token = generateToken(userClaims);
-      return token;
+      const token: ITokenResponse = generateTokens(userClaims)
+      // const token = generateToken(userClaims);
+      return token
     } else {
       throw new Error("Error verifying password");
     }
   },
 
   async createUser(userData: IUser) {
-    const hasing: string = await hashPassword(userData.password);
+    const pwd = userData?.password as string
+    const hasing: string = await hashPassword(pwd);
     return prisma.user.create({
       data: {
         ...userData,
@@ -120,6 +121,7 @@ const UserService = {
       select: {
         id: true,
         username: true,
+        name: true,
         email: true,
         phone_number: true,
         role: true,

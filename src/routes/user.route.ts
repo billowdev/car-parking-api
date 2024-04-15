@@ -5,6 +5,7 @@ import { authMiddleware, roleMiddleware} from './../middlewares/auth.middleware'
 
 const router = express.Router();
 
+router.post("/refresh", UserController.refresh);
 router.post("/login", UserController.login);
 router.post("/", UserController.createUser);
 router.get(

@@ -7,12 +7,7 @@ const prisma = new PrismaClient();
 
 import { JWT_SECRET_KEY } from "../configs/config";
 import { IUser } from "./../interfaces/user.interface";
-
-interface TokenPayload {
-  sub: string;
-  role: string;
-  exp: number;
-}
+import { ITokenPayload } from "../utils/jwt.util";
 
 class AuthError extends Error {
   constructor(message: string) {
@@ -34,16 +29,15 @@ export const authMiddleware = async (
       const decodedToken = jwt.verify(
         token,
         JWT_SECRET_KEY as string
-      
-	) as TokenPayload;
+      ) as ITokenPayload;
       if (new Date().getTime() > decodedToken.exp * 1000) {
         throw new AuthError("Token expired");
       }
 
       const userID = decodedToken.sub as string;
-	  if (!userID) {
-		throw new AuthError("Invalid Token");
-	  }
+      if (!userID) {
+        throw new AuthError("Invalid Token");
+      }
       const user = await prisma.user.findUnique({
         where: {
           id: parseInt(userID),
@@ -53,22 +47,14 @@ export const authMiddleware = async (
       if (!user) {
         throw new AuthError("Unauthorized");
       }
-	//   const validRoles: ["USER", "ADMIN"] = ["USER", "ADMIN"];
-	//   let role: "USER" | "ADMIN" = "USER"; 
-	//   if (validRoles.includes(user.role as "USER" | "ADMIN")) {
-	// 	  role = user.role as "USER" | "ADMIN";
-	//   } else {
-	// 	  // Handle the case where user.role is not a valid role
-	// 	  console.error("Invalid user role:", user.role);
-	//   }
+
       const userInfo: IUser = {
         id: user.id,
         name: user.name,
         username: user.username,
-        password: user.password,
         email: user.email,
         phone_number: user.phone_number,
-        role:  user.role,
+        role: user.role,
         created_at: user.created_at,
         updated_at: user.updated_at,
       };
