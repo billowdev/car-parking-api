@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import UserService from "../services/user.service";
 import { newResponse, parseStringQuery } from "../utils/common.util";
 import {
   IAPIResponse,
@@ -11,14 +10,24 @@ import {
 
 import os from "os";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
+import UserService from './../services/user.service';
 const hostname = os.hostname();
 
 export const UserController = {
   async login(req: Request, res: Response) {
     try {
-      newResponse<any>(res, 200, "SUCCESS", {});
-    } catch (error) {
-      res.status(400).json({ error: "logged in was failed" });
+      const credentials = {
+        username: req.body.username,
+        password: req.body.password,
+      }
+      const token = await UserService.login(credentials)
+      return newResponse<any>(res, 200, "SUCCESS", token);
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
@@ -26,8 +35,12 @@ export const UserController = {
     try {
       const newUser = await UserService.createUser(req.body);
       res.json(newUser);
-    } catch (error) {
-      res.status(400).json({ error: "Could not create user" });
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
@@ -64,12 +77,14 @@ export const UserController = {
       };
 
       const users = await UserService.getAllUsers(params, filters);
-      res.json(users);
-    } catch (error) {
-      console.log("--------------------------------")
-      console.log(error)
-      console.log("--------------------------------")
-      res.status(400).json({ error: "Could not fetch users" });
+      // res.json(users);
+      return newResponse<typeof users>(res, 200, "SUCCESS", users);
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
@@ -81,8 +96,12 @@ export const UserController = {
         return res.status(404).json({ error: "User not found" });
       }
       res.json(user);
-    } catch (error) {
-      res.status(400).json({ error: "Could not fetch user" });
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
@@ -91,8 +110,12 @@ export const UserController = {
     try {
       const updatedUser = await UserService.updateUser(parseInt(id), req.body);
       res.json(updatedUser);
-    } catch (error) {
-      res.status(400).json({ error: "Could not update user" });
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
@@ -101,8 +124,12 @@ export const UserController = {
     try {
       await UserService.deleteUser(parseInt(id));
       res.json({ message: "User deleted successfully" });
-    } catch (error) {
-      res.status(400).json({ error: "Could not delete user" });
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 };

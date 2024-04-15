@@ -9,7 +9,6 @@ export interface IPaginationOptions {
   page?: number;
   page_size?: number;
   host?: string;
-
 }
 
 export interface IPaginationLinks {

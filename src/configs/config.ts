@@ -1,4 +1,4 @@
-
+export const JWT_TOKEN_EXP = '24h';
 
 export const  ROLE_ENUM = {
   "ADMIN":"admin",

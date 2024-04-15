@@ -19,7 +19,7 @@ export interface IUser {
   password: string;
   email: string;
   phone_number: string;
-  role: "USER" | "ADMIN";
+  role: string;
   created_at: Date;
   updated_at: Date;
 }
