@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 
 import { generatePaginationLinks } from "./../utils/pagination.util";
-import { applyFilters, applyDateFilters } from "./../utils/pagination.util";
+import {
+  applyFilters,
+  applyDateFilters,
+  applyDeepFilters,
+} from "./../utils/pagination.util";
 
 import {
   IReserving,
@@ -135,6 +139,25 @@ const ReservingService = {
       where,
       filters,
       ["plate_number", "vehicle_brand"],
+      "contains"
+    );
+
+    // applyDeepFilters
+    interface INewDeepFilters {
+      name?: string;
+      username?: string;
+      email?: string;
+    }
+    const newDeepFilters: INewDeepFilters = {
+      name: filters.user_name,
+      username: filters.user_username,
+      email: filters.user_email,
+    };
+    await applyDeepFilters<INewDeepFilters>(
+      where,
+      newDeepFilters,
+      "user",
+      ["name", "email", "username"],
       "contains"
     );
 

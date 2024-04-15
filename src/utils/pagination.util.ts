@@ -64,6 +64,30 @@ export async function applyFilters<T>(
   }
 }
 
+export async function applyDeepFilters<T>(
+  where: any,
+  filterParam: T,
+  relation: string,
+  filterFields: (keyof T)[] = [],
+  filterType: "exact" | "contains" = "contains"
+): Promise<void> {
+  if (filterFields.length === 0) {
+    throw new Error("No filter fields provided");
+  }
+
+  if (!where[relation]) {
+    where[relation] = {};
+  }
+
+  for (const field of filterFields) {
+    const filterValue = filterParam[field];
+    if (filterValue) {
+      where[relation][field] =
+        filterType === "contains" ? { contains: filterValue } : filterValue;
+    }
+  }
+}
+
 // export const applyDateFilters = async (
 //   where: any,
 //   dateFilters: IDateFilterOptions

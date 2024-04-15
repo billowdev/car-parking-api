@@ -48,6 +48,10 @@ export const ReservingController = {
         end_time: parseStringQuery(req.query.end_time),
         user_id: parseStringQuery(req.query.user_id),
         parking_area_id: parseStringQuery(req.query.parking_area_id),
+        
+        user_name: parseStringQuery(req.query.user_name),
+        user_email: parseStringQuery(req.query.user_email),
+        user_username: parseStringQuery(req.query.user_username),
 
         range_filter_field: parseStringQuery(req.query.range_filter_field),
         created_after: parseStringQuery(req.query.created_after),
