@@ -2,9 +2,12 @@ import { PaginationOptions, IDateFilterOptions } from "./common.interface";
 
 export interface IGetAllUserOptions extends IPaginationOptions, IUserFilter {}
 
-export interface IGetAllUserResponse {
+
+export interface IUser {
   id: number;
+  name: string;
   username: string;
+  password?: string;
   email: string;
   phone_number: string;
   role: string;
@@ -12,11 +15,10 @@ export interface IGetAllUserResponse {
   updated_at: Date;
 }
 
-export interface IUser {
+
+export interface IGetAllUserResponse {
   id: number;
-  name: string;
   username: string;
-  password?: string;
   email: string;
   phone_number: string;
   role: string;

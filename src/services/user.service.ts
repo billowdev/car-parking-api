@@ -133,6 +133,7 @@ const UserService = {
     const users: IGetAllUserResponse[] = await prisma.user.findMany({
       select: {
         id: true,
+        name: true,
         username: true,
         email: true,
         phone_number: true,

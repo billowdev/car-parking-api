@@ -36,6 +36,15 @@ async function seedUsers() {
         phone_number: '+0987654322',
         role: ROLE_ENUM.ADMIN,
       },
+      {
+        id: 4,
+        name: 'user Smith',
+        username: 'user',
+        password: hashing,
+        email: 'user@gmail.com',
+        phone_number: '+0987654322',
+        role: ROLE_ENUM.USER,
+      },
     ];
 
     // Insert seed data into the database
