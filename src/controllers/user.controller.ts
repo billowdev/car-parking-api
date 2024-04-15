@@ -9,12 +9,15 @@ import {
   IUserFilter,
   IPaginationOptions,
   IGetAllUserOptions,
+  ErrorResponse,
+  ErrorArray
 } from "../interfaces";
 
 import os from "os";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
 import UserService from "./../services/user.service";
 import { JWT_SECRET_KEY } from "./../configs/config";
+import { validationResult } from 'express-validator';
 
 const hostname = os.hostname();
 
@@ -53,8 +56,9 @@ export const UserController = {
   },
   async login(req: Request, res: Response) {
     try {
+      const username = req.body.username.toLowerCase();
       const credentials = {
-        username: req.body.username,
+        username: username,
         password: req.body.password,
       };
       const token = await UserService.login(credentials);
@@ -69,7 +73,21 @@ export const UserController = {
   },
   async register(req: Request, res: Response) {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ErrorResponse<ErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
+
       const body = req.body;
+      if (body.email) {
+        body.email = body.email.toLowerCase();
+      }
+      if (body.username) {
+        body.username = body.username.toLowerCase();
+      }
       body.role = "user";
       const newUser = await UserService.createUser(body);
       return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
@@ -84,6 +102,12 @@ export const UserController = {
   async createUser(req: Request, res: Response) {
     try {
       const body = req.body;
+      if (body.email) {
+        body.email = body.email.toLowerCase();
+      }
+      if (body.username) {
+        body.username = body.username.toLowerCase();
+      }
       const newUser = await UserService.createUser(body);
       if (body.role && !["admin", "user"].includes(body.role)) {
         throw new Error("Invalid role. Role must be 'admin' or 'user'.");
@@ -101,9 +125,13 @@ export const UserController = {
   async getAllUsers(req: Request, res: Response) {
     try {
       const host = req.protocol + "://" + req.get("host") + req.originalUrl;
+      const email = parseStringQuery(req.query.email)?.toLowerCase() ?? "";
+      const username =
+        parseStringQuery(req.query.username)?.toLowerCase() ?? "";
+
       const filters: IUserFilter | IDateFilterOptions = {
-        email: parseStringQuery(req.query.email),
-        username: parseStringQuery(req.query.username),
+        email: email,
+        username: username,
         phone_number: parseStringQuery(req.query.phone_number),
         id: parseStringQuery(req.query.id),
         name: parseStringQuery(req.query.name),
@@ -164,10 +192,16 @@ export const UserController = {
   async updateUser(req: Request, res: Response) {
     const { id } = req.params;
     try {
-      const data = req.body;
+      const body = req.body;
+      if (body.email) {
+        body.email = body.email.toLowerCase();
+      }
+      if (body.username) {
+        body.username = body.username.toLowerCase();
+      }
       const existing = await UserService.getUserById(parseInt(id));
-      const updatedUser = await UserService.updateUser(parseInt(id), data);
-      if (data.role && !["admin", "user"].includes(data.role)) {
+      const updatedUser = await UserService.updateUser(parseInt(id), body);
+      if (body.role && !["admin", "user"].includes(body.role)) {
         throw new Error("Invalid role. Role must be 'admin' or 'user'.");
       }
       return newResponse<typeof updatedUser>(res, 200, "SUCCESS", updatedUser);

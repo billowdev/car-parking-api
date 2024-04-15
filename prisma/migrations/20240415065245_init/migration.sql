@@ -15,7 +15,7 @@ CREATE TABLE "users" (
 CREATE TABLE "parking_areas" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
-    "isReserved" BOOLEAN NOT NULL,
+    "is_reserved" BOOLEAN NOT NULL,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" DATETIME NOT NULL
 );
