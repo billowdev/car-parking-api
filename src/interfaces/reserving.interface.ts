@@ -7,7 +7,8 @@ export interface IReserving {
 	plate_number: string;
 	vehicle_brand: string;
 	price: number;
-	reserve_date: Datetime;
+	start_time: Datetime;
+	end_time: Datetime;
 	user_id: number;
 }
 
@@ -17,6 +18,8 @@ export interface IReservingFilter extend IDateFilterOptions {
 	vehicle_brand?: string;
 	price?: string;
 	reserve_date?: string;
+	start_time: string;
+	end_time: string;
 	user_id?: number;
 }
 
@@ -29,6 +32,8 @@ export interface IReservingResponse {
 	reserve_date: Datetime;
 	user_id: number;
 	user: IUser;
+	start_time: Datetime;
+	end_time: Datetime;
 	parking_area_id: 
 }
   
