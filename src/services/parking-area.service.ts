@@ -1,17 +1,23 @@
 import { PrismaClient } from "@prisma/client";
+import { generatePaginationLinks } from "./../utils/pagination.util";
+import { applyFilters, applyDateFilters } from "./../utils/pagination.util";
+
 import {
-import { IParkingAreaResponse } from './../interfaces/parking-area.interface';
+  IParkingArea,
+  IParkingAreaResponse,
   IParkingAreaFilter,
   IPaginationResponse,
   IPaginationOptions,
-} from "./../interfaces";
+  IDateFilterOptions
+} from "../interfaces";
+
 const prisma = new PrismaClient();
 
 const ParkingAreaService = {
   async createParkingArea(payload: IParkingArea) {
     // Check for duplicate name
     const existingName = await prisma.parkingArea.findFirst({
-      where: { name: payload.name.toLowerCase() },
+      where: { name: payload.name },
     });
 
     if (existingName) {
@@ -27,32 +33,34 @@ const ParkingAreaService = {
         created_at: true,
         updated_at: true,
       },
-      data: {
-        ...payload,
-        name: payload.name.toLowerCase(),
-      },
+      data: payload,
     });
   },
 
-  async getAllParkingAreas(
+  async getAllParkingArea(
     options: IPaginationOptions,
     filters: IParkingAreaFilter | IDateFilterOptions
   ) {
     let page = options.page ?? 1;
     let page_size = options.page_size ?? 10;
     let host = options.host ?? "";
-    
+
     const skip = (page - 1) * page_size;
     let where: any = {};
 
     await applyFilters<IParkingAreaFilter>(
       where,
       filters,
-      ["id", "name", "is_reserved"],
+      ["id", "name"],
       "contains"
     );
 
-    await applyFilters<IParkingAreaFilter>(where, filters, ["is_reserved"], "exacts");
+    await applyFilters<IParkingAreaFilter>(
+      where,
+      filters,
+      ["is_reserved"],
+      "exact"
+    );
 
     const dateFilters: IDateFilterOptions = {
       created_at: filters.created_at,
@@ -67,7 +75,6 @@ const ParkingAreaService = {
     };
     await applyDateFilters(where, dateFilters);
 
-
     const result: IParkingAreaResponse[] = await prisma.parkingArea.findMany({
       select: {
         id: true,
@@ -81,7 +88,10 @@ const ParkingAreaService = {
       take: page_size,
     });
 
-    const paginationResponse: IPaginationResponse<IGetAllUserResponse[]> = {
+    const total_count = await prisma.user.count({ where });
+    const total_pages = Math.ceil(total_count / page_size);
+
+    const paginationResponse: IPaginationResponse<IParkingAreaResponse[]> = {
       links: generatePaginationLinks(host, page, page_size, total_pages),
       total: total_count,
       page,
@@ -90,7 +100,6 @@ const ParkingAreaService = {
       rows: result,
     };
     return paginationResponse;
-
   },
 
   async getParkingAreaById(id: number) {
@@ -131,10 +140,7 @@ const ParkingAreaService = {
         created_at: true,
         updated_at: true,
       },
-      data: {
-        ...payload,
-        name: payload.name.toLowerCase(),
-      },
+      data: payload
     });
   },
 

@@ -129,8 +129,6 @@ const UserService = {
 
     await applyDateFilters(where, dateFilters);
 
-    const total_count = await prisma.user.count({ where });
-    const total_pages = Math.ceil(total_count / page_size);
 
     const users: IGetAllUserResponse[] = await prisma.user.findMany({
       select: {
@@ -146,6 +144,8 @@ const UserService = {
       skip,
       take: page_size,
     });
+    const total_count = await prisma.user.count({ where });
+    const total_pages = Math.ceil(total_count / page_size);
 
     const paginationResponse: IPaginationResponse<IGetAllUserResponse[]> = {
       links: generatePaginationLinks(host, page, page_size, total_pages),

@@ -10,14 +10,15 @@ import {
   IPaginationOptions,
   IGetAllUserOptions,
   ErrorResponse,
-  ErrorArray
+  ErrorArray,
 } from "../interfaces";
 
 import os from "os";
 import { IDateFilterOptions } from "./../interfaces/common.interface";
 import UserService from "./../services/user.service";
 import { JWT_SECRET_KEY } from "./../configs/config";
-import { validationResult } from 'express-validator';
+import { validationResult } from "express-validator";
+import { ITokenResponse } from "./../utils/jwt.util";
 
 const hostname = os.hostname();
 
@@ -26,29 +27,23 @@ export const UserController = {
     const refreshToken = req.body.refresh_token;
 
     try {
-      // Verify the refresh token
       const verify = verifyToken(refreshToken);
       const decoded = decodeToken(refreshToken);
-
-      // Assuming you extract the necessary user information from the refresh token
       const sub = decoded.sub ?? "";
       const user = await UserService.getUserById(parseInt(sub)); // Fetch user from database based on userId
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      // Generate new tokens for the user
       const { access_token, refresh_token: newRefreshToken } = generateTokens({
         sub: sub,
         role: user.role,
         name: user.name,
       });
-
-      // Send the new access token and refresh token back to the client
-      return res
-        .status(200)
-        .json({ access_token, refresh_token: newRefreshToken });
+      return newResponse<ITokenResponse>(res, 200, "SUCCESS", {
+        access_token,
+        refresh_token: newRefreshToken,
+      });
     } catch (error) {
       console.error("Error refreshing token:", error);
       return res.status(401).json({ message: "Invalid refresh token" });
@@ -65,7 +60,7 @@ export const UserController = {
       return newResponse<any>(res, 200, "SUCCESS", token);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->login---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
@@ -93,7 +88,7 @@ export const UserController = {
       return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->register---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
@@ -101,6 +96,14 @@ export const UserController = {
   },
   async createUser(req: Request, res: Response) {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ErrorResponse<ErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
+
       const body = req.body;
       if (body.email) {
         body.email = body.email.toLowerCase();
@@ -115,7 +118,7 @@ export const UserController = {
       return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->createUser---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
@@ -163,7 +166,7 @@ export const UserController = {
       return newResponse<typeof users>(res, 200, "SUCCESS", users);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
+      console.log("---UserController->getAllUsers---");
       console.log(error);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
@@ -182,16 +185,24 @@ export const UserController = {
       return newResponse<typeof user>(res, 200, "SUCCESS", user);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
-      console.log(error);
+      console.log("---UserController->getUserById---");
+      console.log("error", error);
+      console.log("errMsg", errMsg);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
 
   async updateUser(req: Request, res: Response) {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const response: ErrorResponse<ErrorArray> = {
+          errors: errors.array(),
+        };
+        return newResponse(res, 400, "FAILED", response);
+      }
       const body = req.body;
       if (body.email) {
         body.email = body.email.toLowerCase();
@@ -208,7 +219,8 @@ export const UserController = {
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
       console.log("---UserController---");
-      console.log(error);
+      console.log("error", error);
+      console.log("errMsg", errMsg);
       console.log("-----");
       return newResponse<string>(res, 400, "FAILED", errMsg);
     }
@@ -221,10 +233,16 @@ export const UserController = {
       return newResponse<null>(res, 200, "SUCCESS", null);
     } catch (error: unknown) {
       const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
-      console.log("---UserController---");
-      console.log(error);
+      console.log("---UserController->deleteUser---");
+      console.log("error", error);
+      console.log("errMsg", errMsg);
       console.log("-----");
-      return newResponse<string>(res, 400, "FAILED", errMsg);
+      return newResponse<string>(
+        res,
+        400,
+        "FAILED",
+        "Something went wrong while delete user"
+      );
     }
   },
 };

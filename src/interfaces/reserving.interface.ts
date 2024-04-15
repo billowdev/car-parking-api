@@ -1,4 +1,5 @@
 import { IUser } from './user.interface';
+import { IDateFilterOptions } from "./common.interface";
 
 
 export interface IReserving {
@@ -8,9 +9,19 @@ export interface IReserving {
 	price: number;
 	reserve_date: Datetime;
 	user_id: number;
-  }
-  
-  export interface IReservingResponse {
+}
+
+export interface IReservingFilter extend IDateFilterOptions {
+	id?: string;
+	plate_number?: string;
+	vehicle_brand?: string;
+	price?: string;
+	reserve_date?: string;
+	user_id?: number;
+}
+
+
+export interface IReservingResponse {
 	id: number;
 	plate_number: string;
 	vehicle_brand: string;
@@ -19,5 +30,5 @@ export interface IReserving {
 	user_id: number;
 	user: IUser;
 	parking_area_id: 
-  }
+}
   
