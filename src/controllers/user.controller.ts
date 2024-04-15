@@ -67,7 +67,20 @@ export const UserController = {
       return newResponse<string>(res, 400, "FAILED", errMsg);
     }
   },
-
+  async register(req: Request, res: Response) {
+    try {
+      const body = req.body;
+      body.role = "user";
+      const newUser = await UserService.createUser(body);
+      return newResponse<typeof newUser>(res, 200, "SUCCESS", newUser);
+    } catch (error: unknown) {
+      const errMsg = (error as Error)?.message ?? ""; // Type assertion to inform TypeScript that 'error' is of type 'Error'
+      console.log("---UserController---");
+      console.log(error);
+      console.log("-----");
+      return newResponse<string>(res, 400, "FAILED", errMsg);
+    }
+  },
   async createUser(req: Request, res: Response) {
     try {
       const body = req.body;
@@ -134,7 +147,9 @@ export const UserController = {
       const { id } = req.params;
       const user = await UserService.getUserById(parseInt(id));
       if (!user) {
-        return newResponse<{error: string}>(res, 404, "FAILED", { error: "User not found" });
+        return newResponse<{ error: string }>(res, 404, "FAILED", {
+          error: "User not found",
+        });
       }
       return newResponse<typeof user>(res, 200, "SUCCESS", user);
     } catch (error: unknown) {
@@ -150,7 +165,7 @@ export const UserController = {
     const { id } = req.params;
     try {
       const data = req.body;
-      const existing = await UserService.getUserById(parseInt(id)); 
+      const existing = await UserService.getUserById(parseInt(id));
       const updatedUser = await UserService.updateUser(parseInt(id), data);
       if (data.role && !["admin", "user"].includes(data.role)) {
         throw new Error("Invalid role. Role must be 'admin' or 'user'.");
