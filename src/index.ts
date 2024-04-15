@@ -10,7 +10,7 @@ import { IUser } from './interfaces/user.interface';
 
 const prisma = new PrismaClient();
 const app: Application = express();
-const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const PORT: number = process.env.APP_PORT ? parseInt(process.env.APP_PORT) : 5000;
 
 declare global {
 	namespace Express {
